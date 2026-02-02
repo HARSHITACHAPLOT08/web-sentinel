@@ -4,6 +4,9 @@ from database.db_manager import DBManager
 from database.models import CheckLog, AlertLog
 import time
 from datetime import datetime, timedelta
+from apscheduler.schedulers.background import BackgroundScheduler
+from monitors.checker import SiteChecker
+import os
 
 st.set_page_config(
     page_title="SiteMonitor OSINT Pro",
@@ -88,6 +91,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 db = DBManager()
+
+# --- Background Monitor Initialization (Singleton) ---
+@st.cache_resource
+def start_monitor():
+    scheduler = BackgroundScheduler()
+    checker = SiteChecker(db)
+    websites = db.get_active_websites()
+    for site in websites:
+        scheduler.add_job(
+            checker.check_site, 
+            'interval', 
+            seconds=site.check_interval, 
+            args=[site.id],
+            id=f"site_{site.id}",
+            replace_existing=True
+        )
+    scheduler.start()
+    return scheduler
+
+# Start the engine
+if "monitor_started" not in st.session_state:
+    start_monitor()
+    st.session_state.monitor_started = True
 
 # --- Helper Functions ---
 def get_uptime_percentage(website_id, days=7):
