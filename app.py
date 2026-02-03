@@ -97,7 +97,54 @@ db = DBManager()
 def start_monitor():
     scheduler = BackgroundScheduler()
     checker = SiteChecker(db)
+    
+    # --- Auto-Seeding for Cloud (If DB is empty) ---
     websites = db.get_active_websites()
+    if not websites:
+        from reset_and_seed import reset_and_seed
+        # We don't want to wipe the DB if it's just a restart, 
+        # but reset_and_seed does. For cloud safety, we just add missing ones.
+        sites = [
+            ("GKToday - SSC/UPSC", "https://www.gktoday.in/"),
+            ("Drishti IAS - News Analysis", "https://www.drishtiias.com/current-affairs-news-analysis-editorials"),
+            ("AffairsCloud - Quizzes/PDFs", "https://affairscloud.com/"),
+            ("Adda247 - SSC/Banking", "https://currentaffairs.adda247.com/"),
+            ("PW Live - SSC/Railway", "https://www.pw.live/ssc/exams/daily-current-affairs-today"),
+            ("Python.org Blogs", "https://www.python.org/blogs"),
+            ("Python Weekly", "https://www.pythonweekly.com/"),
+            ("Real Python News", "https://realpython.com/tutorials/news"),
+            ("The Hacker News", "https://thehackernews.com/"),
+            ("Dark Reading", "https://www.darkreading.com/"),
+            ("Security Week", "https://www.securityweek.com/"),
+            ("Automate the Boring Stuff", "https://automatetheboringstuff.com/"),
+            ("Real Python - Automation", "https://realpython.com/"),
+            ("SSC Official Site", "https://ssc.gov.in/"),
+            ("Testbook - SSC CGL", "https://testbook.com/ssc-cgl-exam"),
+            ("Oliveboard - SSC CGL", "https://www.oliveboard.in/ssc-cgl"),
+            ("Google", "https://www.google.com/"),
+            ("YouTube", "https://www.youtube.com/"),
+            ("MyGov India", "https://www.mygov.in/"),
+            ("Microsoft IT", "https://www.microsoft.com/"),
+            ("TechCrunch", "https://techcrunch.com/"),
+            ("Wired", "https://www.wired.com/"),
+            ("The Verge", "https://www.theverge.com/"),
+            ("MIT Technology Review", "https://www.technologyreview.com/"),
+            ("Engadget", "https://www.engadget.com/"),
+            ("Ars Technica", "https://arstechnica.com/"),
+            ("VentureBeat", "https://venturebeat.com/"),
+            ("Digital Trends", "https://www.digitaltrends.com/"),
+            ("Reuters Technology", "https://www.reuters.com/technology"),
+            ("WEBaniX Solutions", "https://webanixsolutions.com/"),
+            ("PHP Poets Solutions", "https://phppoets.com/"),
+            ("Zenver Technologies", "https://www.zenver.in/"),
+            ("WhatsApp", "https://www.whatsapp.com/"),
+        ]
+        for name, url in sites:
+            try:
+                db.add_website(name, url, 300)
+            except: pass
+        websites = db.get_active_websites()
+
     for site in websites:
         scheduler.add_job(
             checker.check_site, 

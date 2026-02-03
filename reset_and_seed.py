@@ -61,6 +61,9 @@ def reset_and_seed():
         ("WEBaniX Solutions", "https://webanixsolutions.com/"),
         ("PHP Poets Solutions", "https://phppoets.com/"),
         ("Zenver Technologies", "https://www.zenver.in/"),
+        
+        # Social Media / Communication
+        ("WhatsApp", "https://www.whatsapp.com/"),
     ]
     
     print(f"Seeding {len(sites)} categorized websites...")
